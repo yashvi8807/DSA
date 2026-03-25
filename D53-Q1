@@ -1,0 +1,138 @@
+//Problem Statement:
+Given a binary tree, print its vertical order traversal. Nodes that lie on the same vertical line should be printed together from top to bottom and from left to right.
+
+Input Format:
+- First line contains integer N (number of nodes)
+- Second line contains N space-separated integers representing level-order traversal (-1 indicates NULL)
+
+Output Format:
+- Print nodes column by column from leftmost to rightmost vertical line
+
+Example:
+Input:
+7
+1 2 3 4 5 6 7
+
+Output:
+4
+2
+1 5 6
+3
+7
+
+Explanation:
+Vertical lines are formed based on horizontal distance from root. Nodes sharing the same distance are printed together.
+
+code:
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NODES 1000
+
+typedef struct TreeNode {
+    int val;
+    struct TreeNode *left, *right;
+} TreeNode;
+
+typedef struct {
+    TreeNode *node;
+    int hd;
+} QueueItem;
+
+TreeNode *newNode(int val) {
+    TreeNode *n = malloc(sizeof(TreeNode));
+    n->val = val;
+    n->left = n->right = NULL;
+    return n;
+}
+
+TreeNode *buildTree(int *vals, int n) {
+    if (n == 0 || vals[0] == -1) return NULL;
+    TreeNode *nodes[MAX_NODES] = {NULL};
+    nodes[0] = newNode(vals[0]);
+
+    int q[MAX_NODES], front = 0, back = 0;
+    q[back++] = 0;
+    int i = 1;
+
+    while (front < back && i < n) {
+        int idx = q[front++];
+        TreeNode *cur = nodes[idx];
+
+        int left_idx = 2 * idx + 1;
+        int right_idx = 2 * idx + 2;
+
+        if (i < n && vals[i] != -1) {
+            nodes[left_idx] = newNode(vals[i]);
+            cur->left = nodes[left_idx];
+            q[back++] = left_idx;
+        }
+        i++;
+
+        if (i < n && vals[i] != -1) {
+            nodes[right_idx] = newNode(vals[i]);
+            cur->right = nodes[right_idx];
+            q[back++] = right_idx;
+        }
+        i++;
+    }
+    return nodes[0];
+}
+
+int colData[MAX_NODES][MAX_NODES];
+int colCount[MAX_NODES];
+
+void verticalOrder(TreeNode *root) {
+    if (!root) return;
+
+    QueueItem queue[MAX_NODES];
+    int front = 0, back = 0;
+
+    queue[back++] = (QueueItem){root, 0};
+
+    int minHD = 0, maxHD = 0;
+
+    // offset so we can use array index (shift by MAX_NODES/2)
+    int offset = MAX_NODES / 2;
+    memset(colCount, 0, sizeof(colCount));
+
+    while (front < back) {
+        QueueItem item = queue[front++];
+        TreeNode *node = item.node;
+        int hd = item.hd;
+
+        int idx = hd + offset;
+        colData[idx][colCount[idx]++] = node->val;
+
+        if (hd < minHD) minHD = hd;
+        if (hd > maxHD) maxHD = hd;
+
+        if (node->left)
+            queue[back++] = (QueueItem){node->left, hd - 1};
+        if (node->right)
+            queue[back++] = (QueueItem){node->right, hd + 1};
+    }
+
+    for (int hd = minHD; hd <= maxHD; hd++) {
+        int idx = hd + offset;
+        for (int j = 0; j < colCount[idx]; j++) {
+            if (j > 0) printf(" ");
+            printf("%d", colData[idx][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+
+    int vals[MAX_NODES];
+    for (int i = 0; i < n; i++)
+        scanf("%d", &vals[i]);
+
+    TreeNode *root = buildTree(vals, n);
+    verticalOrder(root);
+    return 0;
+}
