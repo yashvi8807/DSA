@@ -29,41 +29,53 @@ For the given array [1, 2, 4, 4, 4, 5, 7] and x = 4:
 Binary Search is used to find both bounds efficiently in O(log n) time.
 
 Code:
-def lower_bound(arr, x):
-    left, right = 0, len(arr)
-    
-    while left < right:
-        mid = (left + right) // 2
-        
-        if arr[mid] < x:
-            left = mid + 1
-        else:
-            right = mid
-    
-    return left
+#include <stdio.h>
 
+int lower_bound(int arr[], int n, int x) {
+    int left = 0, right = n;
 
-def upper_bound(arr, x):
-    left, right = 0, len(arr)
-    
-    while left < right:
-        mid = (left + right) // 2
-        
-        if arr[mid] <= x:
-            left = mid + 1
-        else:
-            right = mid
-    
-    return left
+    while (left < right) {
+        int mid = (left + right) / 2;
 
+        if (arr[mid] < x)
+            left = mid + 1;
+        else
+            right = mid;
+    }
 
-# Input
-n = int(input())
-arr = list(map(int, input().split()))
-x = int(input())
+    return left;
+}
 
-# Output
-lb = lower_bound(arr, x)
-ub = upper_bound(arr, x)
+int upper_bound(int arr[], int n, int x) {
+    int left = 0, right = n;
 
-print(lb, ub)
+    while (left < right) {
+        int mid = (left + right) / 2;
+
+        if (arr[mid] <= x)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+
+    return left;
+}
+
+int main() {
+    int n, x;
+
+    scanf("%d", &n);
+    int arr[n];
+
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+    scanf("%d", &x);
+
+    int lb = lower_bound(arr, n, x);
+    int ub = upper_bound(arr, n, x);
+
+    printf("%d %d\n", lb, ub);
+
+    return 0;
+}
